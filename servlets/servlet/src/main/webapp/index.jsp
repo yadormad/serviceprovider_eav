@@ -14,13 +14,11 @@
 </head>
 <body class = stpage>
 <h1 class = stpage>Activity menu</h1>
-<form class="inputform" action="client/all.jsp" method=post>
+<form class="inputform" action="client/all.jsp" method=get>
     <button name="performButton" type="submit" class=inputform>View all clients</button>
 </form>
-<form class="inputform" action="service/menu.jsp" method=post>
+<form class="inputform" action="servicemanager/menu.jsp" method=get>
     <button name="performButton" type="submit" class=inputform>View service manager</button>
 </form>
-<a href="export.xml" class="stpage">Download xml</a>
-<a href="import.jsp" class="stpage">Import xml</a>
 </body>
 </html>

@@ -1,20 +1,22 @@
 package model.dao.impl.hibernate.eav;
 
-import model.dao.impl.hibernate.ServiceAttributeTypeDaoHibernate;
-import model.dao.impl.hibernate.ServiceTypeDaoHibernate;
 import model.service.obj.ServiceAttributeObject;
-import model.service.obj.ServiceAttributeTypeObject;
+import model.service.obj.ServiceCatalogObject;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "service_attributes", schema = "public", catalog = "provider_eav")
-public class ServiceAttributesEntity {
+public class ServiceAttributesEntity implements ProviderEntity<ServiceAttributeObject>{
     private int id;
     private String name;
-    private boolean isListed, isMultiple;
+    private boolean isListed;
     private ServiceAttributeTypesEntity attributeType;
     private Set<ServiceValueCatalogEntity> valueCatalog;
     private Set<ServiceValuesEntity> valuesEntitySet;
@@ -64,7 +66,8 @@ public class ServiceAttributesEntity {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name="provider_sequence",sequenceName="provider_seq")
+    @GeneratedValue(strategy=GenerationType.IDENTITY,generator="provider_sequence")
     public int getId() {
         return id;
     }
@@ -93,16 +96,6 @@ public class ServiceAttributesEntity {
         isListed = listed;
     }
 
-    @Basic
-    @Column(name = "is_multiple")
-    public boolean isMultiple() {
-        return isMultiple;
-    }
-
-    public void setMultiple(boolean multiple) {
-        isMultiple = multiple;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -119,10 +112,55 @@ public class ServiceAttributesEntity {
         return Objects.hash(id, name, isListed);
     }
 
-    public void fromObject(ServiceAttributeObject object) {
-        this.attributeType = ServiceAttributeTypeDaoHibernate.toEntity(object.getAttributeType());
+    @Override
+    public ServiceAttributeObject toObject(Session session) {
+        ServiceAttributeObject attributeObject = new ServiceAttributeObject(this.id, this.name, this.isListed, this.attributeType.toObject(session));
+        Hibernate.initialize(this.valueCatalog);
+        if(attributeObject.isListed()) {
+            if(this.valueCatalog == null) this.valueCatalog = new HashSet<>();
+            for(ServiceValueCatalogEntity valueCatalogEntity:this.valueCatalog) {
+                attributeObject.getCatalogValueMap().put(valueCatalogEntity.getId(), valueCatalogEntity.toObject(session));
+            }
+        }
+        return attributeObject;
+    }
+
+    @Override
+    public void fromObject(ServiceAttributeObject object, Session session) {
+        this.attributeType = session.get(ServiceAttributeTypesEntity.class, object.getAttributeType().getId());
+        Hibernate.initialize(this.attributeType.getAttributesEntitySet());
+        this.attributeType.getAttributesEntitySet().add(this);
         this.name = object.getName();
         this.isListed = object.isListed();
-        this.isMultiple = object.isMultiple();
+        Hibernate.initialize(this.valueCatalog);
+        if(this.isListed) {
+            if(this.valueCatalog == null) this.valueCatalog = new HashSet<>();
+            Collection<ServiceValueCatalogEntity> removedCatalogEntities = new HashSet<>(this.valueCatalog);
+            if(object.getCatalogValueMap() != null && !object.getCatalogValueMap().isEmpty()) {
+                for (ServiceCatalogObject catalogObject : object.getCatalogValueMap().values()) {
+                    ServiceValueCatalogEntity catalogEntity;
+                    if (catalogObject.getId() == null) {
+                        catalogEntity = new ServiceValueCatalogEntity();
+                        catalogEntity.setAttributeEntity(this);
+                    } else {
+                        catalogEntity = session.get(ServiceValueCatalogEntity.class, catalogObject.getId());
+                        removedCatalogEntities.remove(catalogEntity);
+                    }
+                    catalogEntity.fromObject(catalogObject, session);
+                    session.save(catalogEntity);
+                }
+            }
+            for(ServiceValueCatalogEntity catalogEntity:removedCatalogEntities) {
+                this.valueCatalog.remove(catalogEntity);
+                session.remove(catalogEntity);
+            }
+        } else {
+            if (this.valueCatalog != null) {
+                for (ServiceValueCatalogEntity catalogEntity : this.valueCatalog) {
+                    session.remove(catalogEntity);
+                }
+                this.valueCatalog.clear();
+            }
+        }
     }
 }

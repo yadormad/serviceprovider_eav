@@ -1,12 +1,18 @@
 package model.client;
 
 import model.ProviderObject;
+import model.service.obj.ServiceObject;
+import model.service.obj.ServiceTypeObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientObject implements ProviderObject{
     private Integer id;
     private String login;
     private String info;
     private String pass;
+    private Map<ServiceTypeObject, ServiceObject> serviceObjectMap;
 
     public ClientObject(Integer id, String login, String info, String pass) {
         this.id = id;
@@ -53,4 +59,14 @@ public class ClientObject implements ProviderObject{
     public void setPass(String pass) {
         this.pass = pass;
     }
+
+    public Map<ServiceTypeObject, ServiceObject> getServiceObjectMap() {
+        if(this.serviceObjectMap == null) this.serviceObjectMap = new HashMap<>();
+        return serviceObjectMap;
+    }
+
+    public void setServiceObjectMap(Map<ServiceTypeObject, ServiceObject> serviceObjectMap) {
+        this.serviceObjectMap = serviceObjectMap;
+    }
+
 }

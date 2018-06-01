@@ -4,6 +4,7 @@ import model.ProviderObject;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class ServiceTypeObject implements ProviderObject {
@@ -56,5 +57,18 @@ public class ServiceTypeObject implements ProviderObject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServiceTypeObject that = (ServiceTypeObject) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

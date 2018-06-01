@@ -1,6 +1,7 @@
 package model.dao.impl.hibernate;
 
 import model.ProviderObject;
+import model.dao.impl.hibernate.eav.ProviderEntity;
 import org.hibernate.Session;
 
 import javax.persistence.TypedQuery;
@@ -35,19 +36,19 @@ abstract class AbstractEntityManager<E extends ProviderEntity<O>, O extends Prov
         return object;
     }
 
-    O getObjectById(Integer id, Class<E> T) {
+    O getObjectById(Integer id, Class<E> eClass) {
         Session session = HibernateController.getInstance().getSession();
         session.getTransaction().begin();
-        E entity = session.get(T, id);
+        E entity = session.get(eClass, id);
         O object = entity.toObject(session);
         session.getTransaction().commit();
         session.close();
         return object;
     }
 
-    List<O> getAllObjects(Class<E> T) {
+    List<O> getAllObjects(Class<E> eClass) {
         Session session = HibernateController.getInstance().getSession();
-        TypedQuery<E> allEntitiesQuery = session.createQuery("from " + T.getName(), T);
+        TypedQuery<E> allEntitiesQuery = session.createQuery("from " + eClass.getName(), eClass);
         List<E> allEntities = allEntitiesQuery.getResultList();
         List<O> allObjects = new ArrayList<>();
         for(E entity : allEntities) {

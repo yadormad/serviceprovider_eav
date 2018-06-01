@@ -6,16 +6,16 @@ import java.io.Serializable;
 
 public class ServiceValueObject implements ProviderObject {
     private Integer id;
-    private Serializable value;
+    private String value;
     private ServiceCatalogObject catalogValue;
 
-    public ServiceValueObject(Integer id, Serializable value, ServiceCatalogObject catalogValue) {
+    public ServiceValueObject(Integer id, String value, ServiceCatalogObject catalogValue) {
         this.id = id;
         this.value = value;
         this.catalogValue = catalogValue;
     }
 
-    public ServiceValueObject(Serializable value, ServiceCatalogObject catalogValue) {
+    public ServiceValueObject(String value, ServiceCatalogObject catalogValue) {
         this.value = value;
         this.catalogValue = catalogValue;
     }
@@ -30,11 +30,11 @@ public class ServiceValueObject implements ProviderObject {
         this.id = id;
     }
 
-    public Serializable getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Serializable value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

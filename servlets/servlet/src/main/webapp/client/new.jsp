@@ -9,30 +9,36 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<jsp:useBean id="userBean" class="hibernate.controller.ControllerBean">
-    <jsp:setProperty name="userBean" property="*"/>
+<jsp:useBean id="controllerBean" class="hibernate.controller.ControllerBean">
+    <jsp:setProperty name="controllerBean" property="*"/>
 </jsp:useBean>
 
-<c:if test="${param.addButton.equals('submitted')}">
-    <c:set var="addMessage" value="${userBean.addClient(param.name, param.info)}" scope="request"/>
+<c:if test="${param.action.equals('add')}">
+    <c:set var="addMessage" value="${controllerBean.addClient(param.login, param.info, param.pass1, param.pass2)}" scope="request"/>
 </c:if>
 <html>
 <head>
     <title>Add client</title>
-    <link rel="stylesheet" type="text/css" href="../styles/mystyle1.css"/>
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/styles/mystyle1.css"/>
 </head>
 <body class="stpage">
 <h1 class="stpage">Add client</h1>
 <form class="inputform" action="new.jsp" method=post>
     <div style="display: inline-block">
-        <label for=name class = inputform>Client name</label>
-        <input type=text id=name name=name required=required class = inputform value="">
+        <label for=login class = inputform>Login</label>
+        <input type=text id=login name=login required=required class = inputform value="">
     </div>
     <div style="display: inline-block">
-        <label for=info class = inputform>Client info</label>
+        <label for=info class = inputform>Info</label>
         <input type=text id=info name=info required=required class = inputform value="">
     </div>
-    <button name=addButton type=submit class=inputform value="submitted">Add</button>
+    <div style="margin-left: auto">
+        <label for=pass1 class = inputform>Password</label>
+        <input type=password id=pass1 name=pass1 required=required class = inputform value="">
+        <label for=pass2 class = inputform>Confirm password</label>
+        <input type=password id=pass2 name=pass2 required=required class = inputform value="">
+    </div>
+    <button name=action type=submit class=inputform value="add">Add</button>
 </form>
 
 <p><c:out value="${addMessage}"/></p>

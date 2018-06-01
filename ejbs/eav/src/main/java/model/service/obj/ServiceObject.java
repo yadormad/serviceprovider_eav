@@ -10,17 +10,14 @@ public class ServiceObject implements ProviderObject {
     private Integer id;
     private ConcurrentMap<ServiceAttributeObject, ServiceValueObject> attributeValueMap;
     private ServiceTypeObject serviceType;
-    private ClientObject owner;
 
-    public ServiceObject(Integer id, ServiceTypeObject serviceType, ClientObject owner) {
+    public ServiceObject(Integer id, ServiceTypeObject serviceType) {
         this.id = id;
         this.serviceType = serviceType;
-        this.owner = owner;
     }
 
-    public ServiceObject(ServiceTypeObject serviceType, ClientObject owner) {
+    public ServiceObject(ServiceTypeObject serviceType) {
         this.serviceType = serviceType;
-        this.owner = owner;
     }
 
     @Override
@@ -50,12 +47,5 @@ public class ServiceObject implements ProviderObject {
         this.serviceType = serviceType;
     }
 
-    public ClientObject getOwner() {
-        return owner;
-    }
-
-    public void setOwner(ClientObject owner) {
-        this.owner = owner;
-    }
 }
 

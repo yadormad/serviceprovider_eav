@@ -149,6 +149,12 @@ div.modal {
     opacity: 0.0;
     transition: 0.2s;
 }
+
+div.chooseTables {
+    display: inline-block;
+    width:49%;
+}
+
 p.modal {
     font-family: Times, serif;
     font-size: 16px;

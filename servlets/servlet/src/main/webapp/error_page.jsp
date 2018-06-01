@@ -9,6 +9,6 @@
 <p class="error">An error occured</p>
 <%exception.printStackTrace(System.out);%>
 <p class="error"><%=exception.getMessage()%></p><br>
-<a href="${pageContext.request.contextPath}/index.jsp" class="stpage">Back</a>
+<a href="${pageContext.request.contextPath}/index.jsp" class="stpage">Home</a>
 </body>
 </html>

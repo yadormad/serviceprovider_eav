@@ -1,14 +1,17 @@
 package model.dao.impl.hibernate.eav;
 
+import model.service.obj.ServiceValueObject;
+import org.hibernate.Session;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(name = "service_values", schema = "public", catalog = "provider_eav")
-public class ServiceValuesEntity {
+public class ServiceValuesEntity implements ProviderEntity<ServiceValueObject>{
     private int id;
-    private Serializable value;
+    private String value;
     private ServiceAttributesEntity attributeEntity;
     private ServicesEntity servicesEntity;
     private ServiceValueCatalogEntity catalogValue;
@@ -45,7 +48,8 @@ public class ServiceValuesEntity {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name="provider_sequence",sequenceName="provider_seq")
+    @GeneratedValue(strategy=GenerationType.IDENTITY,generator="provider_sequence")
     public int getId() {
         return id;
     }
@@ -56,11 +60,11 @@ public class ServiceValuesEntity {
 
     @Basic
     @Column(name = "value")
-    public Serializable getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Serializable value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -75,7 +79,19 @@ public class ServiceValuesEntity {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, value);
+    }
+
+    @Override
+    public ServiceValueObject toObject(Session session) {
+        return new ServiceValueObject(this.id, this.value, this.catalogValue.toObject(session));
+    }
+
+    @Override
+    public void fromObject(ServiceValueObject object, Session session) {
+        this.value = object.getValue();
+        if(object.getCatalogValue() != null) {
+            this.catalogValue = session.get(ServiceValueCatalogEntity.class, object.getCatalogValue().getId());
+        }
     }
 }

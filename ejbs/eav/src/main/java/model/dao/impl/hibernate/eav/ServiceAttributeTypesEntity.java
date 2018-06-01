@@ -1,12 +1,15 @@
 package model.dao.impl.hibernate.eav;
 
+import model.service.obj.ServiceAttributeTypeObject;
+import org.hibernate.Session;
+
 import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "service_attribute_types", schema = "public", catalog = "provider_eav")
-public class ServiceAttributeTypesEntity {
+public class ServiceAttributeTypesEntity implements ProviderEntity<ServiceAttributeTypeObject> {
     private int id;
     private String name;
     private String javaClass;
@@ -23,7 +26,8 @@ public class ServiceAttributeTypesEntity {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name="provider_sequence",sequenceName="provider_seq")
+    @GeneratedValue(strategy=GenerationType.IDENTITY,generator="provider_sequence")
     public int getId() {
         return id;
     }
@@ -66,4 +70,16 @@ public class ServiceAttributeTypesEntity {
 
         return Objects.hash(id, name);
     }
+
+    @Override
+    public ServiceAttributeTypeObject toObject(Session session) {
+        return new ServiceAttributeTypeObject(this.id, this.name, this.javaClass);
+    }
+
+    @Override
+    public void fromObject(ServiceAttributeTypeObject object, Session session) {
+        this.name = object.getName();
+        this.javaClass = object.getJavaClassName();
+    }
+
 }

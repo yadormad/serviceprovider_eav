@@ -5,13 +5,12 @@ import hibernate.HibernateSessions;
 import hibernate.entity.ClientsEntity;
 import hibernate.entity.ServicesEntity;
 import hibernate.model.service.types.ServiceType;
-import model.dao.DaoFactory;
+import model.client.ClientObject;
 import model.dao.GenericDao;
-import model.dao.impl.hibernate.HibernateDaoFactory;
 import model.service.obj.ServiceAttributeObject;
+import model.service.obj.ServiceAttributeTypeObject;
 import model.service.obj.ServiceTypeObject;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import java.util.*;
 
@@ -24,44 +23,57 @@ public class ControllerBean {
     }
 
     public List<ServiceTypeObject> getAllServiceTypes() {
-        DaoFactory daoFactory = DaoLoader.getDaoFactory();
         GenericDao<ServiceTypeObject> serviceTypeDao = DaoLoader.getDaoFactory().getServiceTypeDao();
         if(serviceTypeDao.getAll() == null) return new ArrayList<>();
         return Objects.requireNonNull(serviceTypeDao).getAll();
     }
 
-    public ServiceTypeObject getServiceType(Integer id) {
-        return DaoLoader.getDaoFactory().getServiceTypeDao().getById(id);
+    public List<ServiceAttributeObject> getAllAttributes() {
+        GenericDao<ServiceAttributeObject> serviceAttributeDao = DaoLoader.getDaoFactory().getServiceAttributeDao();
+        if(serviceAttributeDao.getAll() == null) return new ArrayList<>();
+        return Objects.requireNonNull(serviceAttributeDao).getAll();
     }
 
-    public void saveServiceType(ServiceTypeObject serviceType) {
-        DaoLoader.getDaoFactory().getServiceTypeDao().persist(serviceType);
+
+    public List<ServiceAttributeTypeObject> getAllAttributeTypes() {
+        GenericDao<ServiceAttributeTypeObject> serviceAttributeTypeDao = DaoLoader.getDaoFactory().getServiceAttributeTypeDao();
+        if(serviceAttributeTypeDao.getAll() == null) return new ArrayList<>();
+        return Objects.requireNonNull(serviceAttributeTypeDao).getAll();
     }
 
-    public void addServiceType (String name, String description) {
+    public void removeAttribute(Integer attributeId) {
+        GenericDao<ServiceAttributeObject> serviceAttributeDao = DaoLoader.getDaoFactory().getServiceAttributeDao();
+        serviceAttributeDao.delete(serviceAttributeDao.getById(attributeId));
+    }
+
+    public void addAttribute(String name, Integer attributeTypeId, boolean isListed) throws IllegalAccessException, InstantiationException {
+        GenericDao<ServiceAttributeObject> serviceAttributeDao = DaoLoader.getDaoFactory().getServiceAttributeDao();
+        ServiceAttributeTypeObject serviceAttributeType = DaoLoader.getDaoFactory().getServiceAttributeTypeDao().getById(attributeTypeId);
+        ServiceAttributeObject attributeObject = new ServiceAttributeObject(name, isListed, serviceAttributeType);
+        serviceAttributeDao.persist(attributeObject);
+    }
+
+    public void addServiceType (String name, String description) throws IllegalAccessException, InstantiationException {
         ServiceTypeObject serviceType = new ServiceTypeObject(name, description);
         DaoLoader.getDaoFactory().getServiceTypeDao().persist(serviceType);
     }
 
-    public List<ServiceAttributeObject> getAllAttributes() {
-        return DaoLoader.getDaoFactory().getServiceAttributeDao().getAll();
+    public void removeServiceType(Integer typeId) {
+        DaoLoader.getDaoFactory().getServiceTypeDao().delete(DaoLoader.getDaoFactory().getServiceTypeDao().getById(typeId));
     }
 
-    public ServiceAttributeObject getServiceAttribute(Integer id) {
-        return DaoLoader.getDaoFactory().getServiceAttributeDao().getById(id);
+    public List<ClientObject> getAllClients() {
+        return DaoLoader.getDaoFactory().getClientDao().getAll();
     }
 
-    public List getAllClients() {
-        return HibernateSessions.getAllClients();
-    }
-
-    public String addClient (String name, String info) {
-        HibernateSessions.addClient(name, info);
+    public String addClient (String name, String info, String pass1, String pass2) throws IllegalAccessException, InstantiationException {
+        if(!pass1.equals(pass2)) return "Passwords don't match";
+        DaoLoader.getDaoFactory().getClientDao().persist(new ClientObject(name, info, pass1));
         return "Client " + name + " successfully added";
     }
 
-    public String deleteClient (Integer id) {
-        return "Client " + HibernateSessions.removeClient(id) + " successfully deleted";
+    public void deleteClient (Integer clientId) {
+        DaoLoader.getDaoFactory().getClientDao().delete(DaoLoader.getDaoFactory().getClientDao().getById(clientId));
     }
 
     public String addService(Integer clientId, String name, ServiceType type, Date startDate, Date endDate) {

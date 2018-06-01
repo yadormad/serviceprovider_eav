@@ -2,35 +2,31 @@ package model.service.obj;
 
 import model.ProviderObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ServiceAttributeObject implements ProviderObject {
     private Integer id;
     private String name;
-    private boolean isListed, isMultiple;
+    private boolean isListed;
     private ServiceAttributeTypeObject attributeType;
-    private List<ServiceCatalogObject> catalogValues;
+    private Map<Integer, ServiceCatalogObject> catalogValueMap;
 
-    public ServiceAttributeObject(String name, boolean isListed, boolean isMultiple, ServiceAttributeTypeObject attributeType) {
+    public ServiceAttributeObject(String name, boolean isListed, ServiceAttributeTypeObject attributeType) {
         this.name = name;
         this.isListed = isListed;
-        this.isMultiple = isMultiple;
         this.attributeType = attributeType;
         if(isListed) {
-            catalogValues = new ArrayList<>();
+            catalogValueMap = new HashMap<>();
         }
     }
 
-    public ServiceAttributeObject(Integer id, String name, boolean isListed, boolean isMultiple, ServiceAttributeTypeObject attributeType) {
+    public ServiceAttributeObject(Integer id, String name, boolean isListed, ServiceAttributeTypeObject attributeType) {
         this.id = id;
         this.name = name;
         this.isListed = isListed;
-        this.isMultiple = isMultiple;
         this.attributeType = attributeType;
         if(isListed) {
-            catalogValues = new ArrayList<>();
+            catalogValueMap = new HashMap<>();
         }
     }
 
@@ -60,14 +56,6 @@ public class ServiceAttributeObject implements ProviderObject {
         isListed = listed;
     }
 
-    public boolean isMultiple() {
-        return isMultiple;
-    }
-
-    public void setMultiple(boolean multiple) {
-        isMultiple = multiple;
-    }
-
     public ServiceAttributeTypeObject getAttributeType() {
         return attributeType;
     }
@@ -76,12 +64,9 @@ public class ServiceAttributeObject implements ProviderObject {
         this.attributeType = attributeType;
     }
 
-    public List<ServiceCatalogObject> getCatalogValues() {
-        return catalogValues;
-    }
-
-    public void setCatalogValues(List<ServiceCatalogObject> catalogValues) {
-        this.catalogValues = catalogValues;
+    public Map<Integer, ServiceCatalogObject> getCatalogValueMap() {
+        if(catalogValueMap == null) catalogValueMap = new HashMap<>();
+        return catalogValueMap;
     }
 
     @Override
@@ -90,5 +75,10 @@ public class ServiceAttributeObject implements ProviderObject {
         if (o == null || getClass() != o.getClass()) return false;
         ServiceAttributeObject that = (ServiceAttributeObject) o;
         return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

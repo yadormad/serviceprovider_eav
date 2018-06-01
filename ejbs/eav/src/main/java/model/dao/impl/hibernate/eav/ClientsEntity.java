@@ -1,10 +1,12 @@
 package model.dao.impl.hibernate.eav;
 
 import model.client.ClientObject;
-import model.dao.impl.hibernate.ProviderEntity;
+import model.service.obj.ServiceObject;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -28,7 +30,8 @@ public class ClientsEntity implements ProviderEntity<ClientObject> {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name="provider_sequence",sequenceName="provider_seq")
+    @GeneratedValue(strategy=GenerationType.IDENTITY,generator="provider_sequence")
     public int getId() {
         return id;
     }
@@ -80,13 +83,19 @@ public class ClientsEntity implements ProviderEntity<ClientObject> {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, login, info, pass);
     }
 
     @Override
     public ClientObject toObject(Session session) {
-        return new ClientObject(this.id, this.login, this.info, this.pass);
+        ClientObject clientObject = new ClientObject(this.id, this.login, this.info, this.pass);
+        Hibernate.initialize(this.servicesEntitySet);
+        if(this.servicesEntitySet != null) {
+            for (ServicesEntity servicesEntity :this.servicesEntitySet) {
+                clientObject.getServiceObjectMap().put(servicesEntity.getType().toObject(session), servicesEntity.toObject(session));
+            }
+        }
+        return clientObject;
     }
 
     @Override
@@ -94,5 +103,29 @@ public class ClientsEntity implements ProviderEntity<ClientObject> {
         this.login = object.getLogin();
         this.pass = object.getPass();
         this.info = object.getInfo();
+        Hibernate.initialize(this.servicesEntitySet);
+        if(this.servicesEntitySet == null) this.servicesEntitySet = new HashSet<>();
+        Set<ServicesEntity> deletedServices = new HashSet<>(this.servicesEntitySet);
+        if(!object.getServiceObjectMap().isEmpty()) {
+            for (ServiceObject serviceObject : object.getServiceObjectMap().values()) {
+                ServicesEntity serviceEntity;
+                if (serviceObject.getId() != null) {
+                    serviceEntity = session.get(ServicesEntity.class, object.getId());
+                    deletedServices.remove(serviceEntity);
+                    serviceEntity.fromObject(serviceObject, session);
+                    serviceEntity.setOwner(this);
+                } else {
+                    serviceEntity = new ServicesEntity();
+                    serviceEntity.fromObject(serviceObject, session);
+                    serviceEntity.setOwner(this);
+                    this.servicesEntitySet.add(serviceEntity);
+                }
+                session.save(serviceEntity);
+            }
+        }
+        for(ServicesEntity deletedServiceEntity:deletedServices) {
+            session.remove(deletedServiceEntity);
+            this.servicesEntitySet.remove(deletedServiceEntity);
+        }
     }
 }
